@@ -34,7 +34,19 @@ class PrincipalComponentAnalysis:
         self : object
             Returns the instance itself.
         """
-        pass
+        self.mean = np.mean(X, axis=0)
+        X = X - self.mean
+        cov = np.cov(X, rowvar=False)
+        eigenvalues, eigenvectors = np.linalg.eigh(cov)
+        eigenvectors = eigenvectors.T
+        idxs = np.argsort(eigenvalues)[::-1]
+        eigenvalues = eigenvalues[idxs]
+        eigenvectors = eigenvectors[idxs]
+
+        # Store the first n eigenvectors
+        self.components = eigenvectors[0:self.n_components]
+        return self
+
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -53,7 +65,11 @@ class PrincipalComponentAnalysis:
         X_new : ndarray of shape (n_samples, n_components)
             Transformed values.
         """
-        pass
+        #implement transform method
+        X = X - self.mean
+        X_new = np.dot(X, self.components.T)
+        return X_new
+        
 
 
 # TODO: implement the LDA with numpy
@@ -67,7 +83,7 @@ class LinearDiscriminantAnalysis:
     def fit(self, X: np.ndarray, y: np.ndarray):
         """
         Fit the model according to the given training data.
-
+        
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
@@ -91,7 +107,39 @@ class LinearDiscriminantAnalysis:
         5. Sort the eigenvectors by decreasing eigenvalues and choose k eigenvectors with the largest eigenvalues to form a d×k dimensional matrix W.
         6. Use this d×k eigenvector matrix to transform the samples onto the new subspace.
         """
-        pass
+        #implement fit method
+        # Step 1: Compute the mean vectors for each class.
+        mean_vectors = []
+        for cl in range(1, 4):
+            mean_vectors.append(np.mean(X[y == cl], axis=0))
+        # Step 2: Compute the within-class scatter matrix.
+        S_W = np.zeros((X.shape[1], X.shape[1]))
+        for cl, mv in zip(range(1, 4), mean_vectors):
+            class_sc_mat = np.zeros((X.shape[1], X.shape[1]))
+            for row in X[y == cl]:
+                row, mv = row.reshape(X.shape[1], 1), mv.reshape(X.shape[1], 1)
+                class_sc_mat += (row - mv).dot((row - mv).T)
+            S_W += class_sc_mat
+        # Step 3: Compute the between-class scatter matrix.
+        overall_mean = np.mean(X, axis=0)
+        S_B = np.zeros((X.shape[1], X.shape[1]))
+        for i, mean_vec in enumerate(mean_vectors):
+            n = X[y == i + 1, :].shape[0]
+            mean_vec = mean_vec.reshape(X.shape[1], 1)
+            overall_mean = overall_mean.reshape(X.shape[1], 1)
+            S_B += n * (mean_vec - overall_mean).dot((mean_vec - overall_mean).T)
+
+        # Step 4: Compute the eigenvectors and corresponding eigenvalues for the scatter matrices.
+        eig_vals, eig_vecs = np.linalg.eig(np.linalg.inv(S_W).dot(S_B))
+        # Step 5: Sort the eigenvectors by decreasing eigenvalues and choose k eigenvectors with the largest eigenvalues to form a d×k dimensional matrix W.
+        eig_pairs = [(np.abs(eig_vals[i]), eig_vecs[:, i]) for i in range(len(eig_vals))]
+        eig_pairs = sorted(eig_pairs, key=lambda k: k[0], reverse=True) 
+        W = np.hstack((eig_pairs[0][1].reshape(4, 1), eig_pairs[1][1].reshape(4, 1)))
+        # Step 6: Use this d×k eigenvector matrix to transform the samples onto the new subspace.
+        self.X_lda = X.dot(W)
+        return self
+        
+
 
     def transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -110,7 +158,9 @@ class LinearDiscriminantAnalysis:
         X_new : ndarray of shape (n_samples, n_components)
             Transformed values.
         """
-        pass
+        return np.dot(X, self.components.T) 
+
+        
 
 
 # TODO: Generating adversarial examples for PCA.
@@ -145,4 +195,15 @@ class AdversarialExamples:
             Cluster IDs. y[i] is the cluster ID of the i-th sample.
 
         """
-        pass
+        #implement pca_adversarial_data method
+        # Generate two clusters in 2D space
+        np.random.seed(0)
+        mean1 = [0, 0]
+        cov1 = [[1, 0], [0, 1]]
+        mean2 = [3, 3]
+        cov2 = [[1, 0], [0, 1]]
+        X1 = np.random.multivariate_normal(mean1, cov1, n_samples)
+        X2 = np.random.multivariate_normal(mean2, cov2, n_samples)
+        X = np.concatenate((X1, X2))
+        y = np.concatenate((np.zeros(n_samples), np.ones(n_samples)))
+        return X, y

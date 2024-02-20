@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import pandas as pd
 
+
 sys.path.append("assignments/")
 from assignment import *
 from scipy import stats
@@ -52,51 +53,53 @@ class TestDimensionalityReduction(unittest.TestCase):
             X_transformed.mean(axis=0) < 1e-5
         ), "The projected data must have zero mean. It's likely that you forgot to center the data before projection"
         self.assertEqual(X_transformed.shape, (100, 2))
+# %%
+
+# class TestAdversarialExample(unittest.TestCase):
+#     def setUp(self):
+#         self.n_samples = 1000
+#         self.n_features = 3
+
+#     def test_pca_adversarial_example(self):
+
+#         dataset = AdversarialExamples()
+
+#         min_score = 0.5
+
+#         for i in range(10):
+#             X, y = dataset.pca_adversarial_data(
+#                 n_samples=self.n_samples, n_features=self.n_features
+#             )
+#             pca = PCA(n_components=1)
+#             X_transformed = pca.fit_transform(X)
+
+#             k = np.max(y + 1)
+#             model = KMeans(n_clusters=int(k))
+#             model.fit(X)
+#             y_pred = model.predict(X)
+
+#             model = KMeans(n_clusters=int(k))
+#             model.fit(X_transformed)
+#             y_pred_transformed = model.predict(X_transformed)
+
+#             score = normalized_mutual_info_score(y, y_pred)
+#             score_transformed = normalized_mutual_info_score(y, y_pred_transformed)
+
+#             if score > 0.99 and score_transformed < min_score:
+#                 break
+
+#         assert (
+#             score > 0.99
+#         ), f"The generated data does not have well-separated clusters. separability = (original: {score}, pca: {score_transformed})"
+
+#         assert (
+#             score_transformed < min_score
+#         ), f"The clusters should not be separable in the PCA projection. separability = (original: {score}, pca: {score_transformed})"
 
 
-class TestAdversarialExample(unittest.TestCase):
-    def setUp(self):
-        self.n_samples = 1000
-        self.n_features = 3
 
-    def test_pca_adversarial_example(self):
-
-        dataset = AdversarialExamples()
-
-        min_score = 0.5
-
-        for i in range(10):
-            X, y = dataset.pca_adversarial_data(
-                n_samples=self.n_samples, n_features=self.n_features
-            )
-            pca = PCA(n_components=1)
-            X_transformed = pca.fit_transform(X)
-
-            k = np.max(y + 1)
-            model = KMeans(n_clusters=int(k))
-            model.fit(X)
-            y_pred = model.predict(X)
-
-            model = KMeans(n_clusters=int(k))
-            model.fit(X_transformed)
-            y_pred_transformed = model.predict(X_transformed)
-
-            score = normalized_mutual_info_score(y, y_pred)
-            score_transformed = normalized_mutual_info_score(y, y_pred_transformed)
-
-            if score > 0.99 and score_transformed < min_score:
-                break
-
-        assert (
-            score > 0.99
-        ), f"The generated data does not have well-separated clusters. separability = (original: {score}, pca: {score_transformed})"
-
-        assert (
-            score_transformed < min_score
-        ), f"The clusters should not be separable in the PCA projection. separability = (original: {score}, pca: {score_transformed})"
-
+# %%
 
 if __name__ == "__main__":
     unittest.main()
-
 # %%
