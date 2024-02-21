@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import pandas as pd
 
+
 sys.path.append("assignments/")
 from assignment import *
 from scipy import stats
@@ -52,7 +53,7 @@ class TestDimensionalityReduction(unittest.TestCase):
             X_transformed.mean(axis=0) < 1e-5
         ), "The projected data must have zero mean. It's likely that you forgot to center the data before projection"
         self.assertEqual(X_transformed.shape, (100, 2))
-
+# %%
 
 class TestAdversarialExample(unittest.TestCase):
     def setUp(self):
@@ -96,7 +97,9 @@ class TestAdversarialExample(unittest.TestCase):
         ), f"The clusters should not be separable in the PCA projection. separability = (original: {score}, pca: {score_transformed})"
 
 
+
+# %%
+
 if __name__ == "__main__":
     unittest.main()
-
 # %%
