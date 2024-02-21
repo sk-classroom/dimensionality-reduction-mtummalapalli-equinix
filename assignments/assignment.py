@@ -197,13 +197,23 @@ class AdversarialExamples:
         """
         #implement pca_adversarial_data method
         # Generate two clusters in 2D space
-        np.random.seed(0)
+        if n_features < 2:
+            raise ValueError("number of features must be at least 2 for this adversarial example.")
+        
+        n_samples_per_cluster = n_samples // 2
+
+        # Ensure clear separation
         mean1 = [0, 0]
-        cov1 = [[1, 0], [0, 1]]
-        mean2 = [3, 3]
-        cov2 = [[1, 0], [0, 1]]
-        X1 = np.random.multivariate_normal(mean1, cov1, n_samples)
-        X2 = np.random.multivariate_normal(mean2, cov2, n_samples)
-        X = np.concatenate((X1, X2))
-        y = np.concatenate((np.zeros(n_samples), np.ones(n_samples)))
+        mean2 = [0, 10]  
+
+        # High variance along the first dimension for both clusters
+        cov1 = [[50, 0], [0, 1]]
+        cov2 = [[50, 0], [0, 1]]
+
+        cluster1 = np.random.multivariate_normal(mean1, cov1, n_samples_per_cluster)
+        cluster2 = np.random.multivariate_normal(mean2, cov2, n_samples_per_cluster)
+
+        X = np.vstack((cluster1, cluster2))
+        y = np.array([0] * n_samples_per_cluster + [1] * n_samples_per_cluster)
+
         return X, y
